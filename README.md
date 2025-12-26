@@ -5,6 +5,7 @@ This service manages shared infrastructure for all microservices:
 - Couchbase Database
 - Kafka Message Broker
 - Zookeeper (for Kafka)
+- Redis Cache (for caching and idempotency)
 
 ## Purpose
 - Centralized infrastructure management
@@ -19,7 +20,7 @@ This service manages shared infrastructure for all microservices:
 ```
 
 This single command will:
-1. Start all Docker containers (Couchbase, Zookeeper, Kafka)
+1. Start all Docker containers (Couchbase, Zookeeper, Kafka, Redis)
 2. Wait for services to be healthy
 3. Automatically set up Couchbase (bucket + index)
 4. Automatically set up Kafka topics
@@ -56,12 +57,22 @@ docker compose up -d
 - Port: 9092
 - Topics: `order-events`, `payment-events`, `delivery-events`, `notification-events` (created automatically)
 
+### Redis
+- Host: `localhost`
+- Port: `6379`
+- Max Memory: `512MB`
+- Eviction Policy: `allkeys-lru` (Least Recently Used)
+- Persistence: AOF (Append-Only File) enabled
+- Purpose:
+  - **Caching**: Cache Couchbase documents to reduce database hits
+  - **Idempotency**: Store idempotency keys (TTL: 15-30 minutes)
+
 ## Usage by Microservices
 
 All microservices connect to this infrastructure:
-- Customer Service → connects to localhost:8091 and localhost:9092
-- Restaurant-Order Service → connects to localhost:8091 and localhost:9092
-- Payment Service → connects to localhost:8091 and localhost:9092
+- Customer Service → connects to localhost:8091 (Couchbase), localhost:9092 (Kafka), localhost:6379 (Redis)
+- Restaurant-Order Service → connects to localhost:8091, localhost:9092, localhost:6379
+- Payment Service → connects to localhost:8091, localhost:9092, localhost:6379
 - etc.
 
 ## Logs
@@ -75,5 +86,6 @@ View specific service logs:
 ```bash
 docker compose logs -f couchbase
 docker compose logs -f kafka
+docker compose logs -f redis
 ```
 

@@ -44,7 +44,7 @@ log "Using Docker: $DOCKER_CMD"
 cd "$PROJECT_DIR"
 
 # Start Docker Compose services
-log "Starting Docker Compose services (Couchbase, Zookeeper, Kafka)..."
+log "Starting Docker Compose services (Couchbase, Zookeeper, Kafka, Redis)..."
 log "This may take a few minutes on first run as images are downloaded..."
 $DOCKER_CMD compose up -d --pull always
 
@@ -145,6 +145,10 @@ echo -e ""
 echo -e "${GREEN}  🖥️  Kafka UI:${NC}        http://localhost:8080"
 echo -e ""
 echo -e "${GREEN}  🔗 Zookeeper:${NC}        localhost:2181"
+echo -e ""
+echo -e "${GREEN}  💾 Redis:${NC}            localhost:6379"
+echo -e "${GREEN}     Purpose:${NC}          Caching & Idempotency"
+echo -e "${GREEN}     Max Memory:${NC}       512MB"
 echo -e "${GREEN}==========================================${NC}"
 echo ""
 log "To stop services: $DOCKER_CMD compose down"
